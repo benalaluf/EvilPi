@@ -5,7 +5,7 @@ bin/
 
 cpp/cmake-build-debug
 cpp/cmake-build-debug/
-
+cmake-build-debug/
 # Ignore generated files
 CMakeFiles/
 cmake_install.cmake
