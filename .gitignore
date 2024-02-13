@@ -1,0 +1,49 @@
+# Ignore build and output directories
+build/
+bin/
+.idea
+
+cpp/cmake-build-debug
+cpp/cmake-build-debug/
+
+# Ignore generated files
+CMakeFiles/
+cmake_install.cmake
+CMakeCache.txt
+Makefile
+
+# Ignore compiled binaries and libraries
+*.o
+*.a
+*.so
+
+# Ignore executables
+*.out
+
+# Ignore user-specific files
+*.user
+*.suo
+*.userprefs
+*.sln.docstates
+
+# Ignore IDE-specific files
+.idea/
+
+# Ignore VS Code specific files
+.vscode/
+
+# Ignore compiled Python files
+__pycache__/
+
+# Ignore compiled Java classes
+*.class
+
+# Ignore backup files
+*~
+
+# Ignore Visual Studio Code folder and files
+.vscode/
+.vscode/*
+
+# Ignore macOS specific files
+.DS_Store
