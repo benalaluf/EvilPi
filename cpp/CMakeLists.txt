@@ -12,5 +12,5 @@ endfunction()
 
 create_executable(Admin main_admin_conn.cpp)
 create_executable(ProxyServer main_server_proxy.cpp)
-create_executable(Client main_client_conn.cpp)
-create_executable(MainTest main_test.cpp)
+create_executable(Agent main_agent_conn.cpp)
+
