@@ -9,10 +9,11 @@ int main() {
 
     int socketFD = createTCPIPv4Socket();
 
-    struct sockaddr_in *addr = createIPv4Address("0.0.0.0", 8080);
-    struct sockaddr_in *localAddr = createIPv4Address(socketFD);
+    struct sockaddr_in *addr = createIPv4Address("0.0.0.0", 6969);
     int result = connect(socketFD, (struct sockaddr *) addr, sizeof(struct sockaddr_in));
-    Packet packet(ADMINLOGIN, localAddr, addr);
+    struct sockaddr_in *localAddr = createIPv4Address(socketFD);
+
+    Packet packet(ADMINCONNECT, localAddr, addr);
 
     sendPacket(socketFD, packet);
 
@@ -24,12 +25,11 @@ int main() {
     printf("sending to %s:%d\n", ip, port);
     char msg[]{"hello from admin :)"};
     MsgData msgData(msg);
-    Packet p1(MSG, localAddr, createIPv4Address(ip, port), msgData.serialized(), msgData.dataLength);
 
+    Packet p1(MSG, localAddr, createIPv4Address(ip, port), msgData.serialized(), msgData.dataLength);
 
     sendPacket(socketFD, p1);
     printSerializedPacketMemory(p1.seriallize());
-
     Packet packet1;
     recvPacket(socketFD, &packet1);
     printf("got packet\n");

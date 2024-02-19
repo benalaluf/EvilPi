@@ -16,12 +16,12 @@
 #define PACKET_HEADER_LENGHT sizeof (struct PacketHeader)
 
 enum PacketType : uint16_t {
-    CONNECT = 1,
+    AGENTCONNECT = 1,
     MSG = 2,
     RSH = 3,
     SHOW = 4,
     PING = 5,
-    ADMINLOGIN = 69,
+    ADMINCONNECT = 69,
     SETCONFFILE = 200,
     GETCONFFILE = 2001,
     ERROR = 0,
@@ -37,14 +37,15 @@ struct PacketHeader {
 
     PacketHeader(){};
 
-    PacketHeader(uint8_t *bytes);
+    explicit PacketHeader(uint8_t *bytes);
 
     uint8_t *serialized();
 
-    uint64_t getDataLength();
+    uint64_t getDataLength() const;
 
-    PacketType getType();
+    PacketType getType() const;
 };
+
 
 
 struct Packet {

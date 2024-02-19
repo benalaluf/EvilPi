@@ -19,11 +19,9 @@ private:
 
     int serverSocketFD;
 
+    std::vector<ConnData> connections;
+
     struct sockaddr_in *address;
-
-    std::vector<ConnData> connectedClients;
-
-    ConnData adminConn;
 
     bool bindServerSocket();
 
@@ -33,15 +31,11 @@ private:
 
     void handleAdmin(ConnData connData);
 
-    void handleClients();
+    void handleAgent(ConnData connData);
 
-    void handleClientPacket(Packet packet);
+    void handleAgentPacket(Packet packet);
 
     void handleAdminPacket(Packet packet);
 
-    void updateList();
-
     void forward(Packet packet);
-
-    int isConnOpen(ConnData conn);
 };

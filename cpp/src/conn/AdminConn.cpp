@@ -15,7 +15,7 @@ int AdminConn::main() {
 void AdminConn::connectToServer() {
     int result = connect(adminSocketFD, (sockaddr *) serverAddress, sizeof(struct sockaddr_in));
     if (result == 0) {
-        Packet packet(ADMINLOGIN,localAddress,serverAddress);
+        Packet packet(ADMINCONNECT,localAddress,serverAddress);
         sendPacket(adminSocketFD, packet);
         printf("CONNECTED TO SERVER\n");
     } else {

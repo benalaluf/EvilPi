@@ -7,9 +7,9 @@
 #include "protocol/PacketData.h"
 
 AgentConn::AgentConn(const char *ip, int port) {
-    clientSocketFD = createTCPIPv4Socket();
+    agentSocketFD = createTCPIPv4Socket();
     serverAddress = createIPv4Address(ip, port);
-    localAddress = createIPv4Address(clientSocketFD);
+    localAddress = createIPv4Address(agentSocketFD);
 };
 
 int AgentConn::main() {
@@ -20,11 +20,10 @@ int AgentConn::main() {
 };
 
 void AgentConn::connectToServer() {
-    int result = connect(clientSocketFD, (sockaddr *) serverAddress, sizeof(struct sockaddr_in));
+    int result = connect(agentSocketFD, (sockaddr *) serverAddress, sizeof(struct sockaddr_in));
     if (result == 0) {
-        Packet packet(CONNECT, localAddress, serverAddress);
-        sendPacket(clientSocketFD, packet);
-        printSerializedPacketMemory(packet.seriallize());
+        Packet packet(AGENTCONNECT, localAddress, serverAddress);
+        sendPacket(agentSocketFD, packet);
         printf("CONNECTED TO SERVER\n");
     } else {
         printf("ERRRO WHILE TRYING TO CONNECT TO SEVER %d\n", result);
@@ -36,7 +35,7 @@ void AgentConn::connectToServer() {
 void AgentConn::receive() {
     while (true) {
         Packet packet;
-        int status = recvPacket(clientSocketFD, &packet);;
+        int status = recvPacket(agentSocketFD, &packet);;
         if (status != 0) {
             printf("error while recvPacket %d", status);
             break;
@@ -51,7 +50,7 @@ void AgentConn::handlePacket(Packet packet) {
             handleMsg(packet);
             break;
         case (RSH):
-            startRSHSessionPipe(clientSocketFD);
+            startRSHSessionPipe(agentSocketFD);
             break;
         default:
             printf("got undefiend packet: %d", packet.getType());
@@ -62,7 +61,7 @@ void AgentConn::handlePacket(Packet packet) {
 
 void AgentConn::handleMsg(Packet packet) {
     switchPacketSrcDst(packet);
-    sendPacket(clientSocketFD,packet);
+    sendPacket(agentSocketFD, packet);
     printf("sent to admin\n");
 }
 
@@ -71,10 +70,8 @@ void AgentConn::handleMsg(Packet packet) {
 void AgentConn::send() {
     char msg[]{"hello from client :)"};
     MsgData msgData(msg);
-    Packet p1(MSG, createIPv4Address(clientSocketFD), serverAddress, msgData.serialized(), msgData.dataLength);
+    Packet p1(MSG, createIPv4Address(agentSocketFD), serverAddress, msgData.serialized(), msgData.dataLength);
     printf("sending packets\n");
-    sendPacket(clientSocketFD,p1);
-    sendPacket(clientSocketFD,p1);
-    sendPacket(clientSocketFD,p1);
-    sendPacket(clientSocketFD,p1);
+    sendPacket(agentSocketFD, p1);
+
 };

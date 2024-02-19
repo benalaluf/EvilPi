@@ -16,6 +16,7 @@ ProxyServer::ProxyServer(const char *ip, int port) {
     setsockopt(serverSocketFD, SOL_SOCKET, SO_KEEPALIVE, &keepAlive, sizeof keepAlive);
 
     address = createIPv4Address(ip, port);
+    connections.reserve(2);
 
     bindServerSocket();
 };
@@ -23,12 +24,7 @@ ProxyServer::ProxyServer(const char *ip, int port) {
 int ProxyServer::main() {
 
     std::thread thread1(&ProxyServer::acceptConnections, this);
-    std::thread thread2(&ProxyServer::handleClients, this);
-
     thread1.join();
-    thread2.join();
-
-
     return 0;
 };
 
@@ -68,34 +64,45 @@ void ProxyServer::handleConnection(ConnData connData) {
     int status = recvPacket(connData.SockFD, &registerPacket);
     if (status != 0) return;
     switch (registerPacket.getType()) {
-        case (CONNECT): {
-            connectedClients.push_back(connData);
+        case (AGENTCONNECT): {
+            connections.push_back(connData);
+            std::thread thread1(&ProxyServer::handleAgent, this, connData);
+            thread1.detach();
             break;
         }
-        case (ADMINLOGIN): {
+        case (ADMINCONNECT): {
+            connections.push_back(connData);
             std::thread thread1(&ProxyServer::handleAdmin, this, connData);
             thread1.detach();
             break;
         }
-        case (ERROR): {
-            printf("error\n");
-            break;
-        }
         default: {
-            printf("cant handle packet - %d", registerPacket.getType());
+            printf("cant handle this connectoin: %d", registerPacket.getType());
             close(connData.SockFD);
         }
     }
 
 }
 
-void ProxyServer::handleAdmin(ConnData connData) {
-    printf("handling admin\n");
-    adminConn = connData;
+void ProxyServer::handleAgent(ConnData connData) {
+    printf("handling agent\n");
     while (true) {
         Packet packet;
         int status = recvPacket(connData.SockFD, &packet);
-        printf("admin recv status %d\n", status);
+        if (status != 0) break;
+        if (memcmp(&packet.header.dst, address, sizeof(struct sockaddr_in)) != 0) {
+            forward(packet);
+        } else {
+            handleAgentPacket(packet);
+        }
+    }
+}
+
+void ProxyServer::handleAdmin(ConnData connData) {
+    printf("handling admin\n");
+    while (true) {
+        Packet packet;
+        int status = recvPacket(connData.SockFD, &packet);
         if (status != 0) break;
         if (memcmp(&packet.header.dst, address, sizeof(struct sockaddr_in)) != 0) {
             forward(packet);
@@ -105,20 +112,16 @@ void ProxyServer::handleAdmin(ConnData connData) {
     }
 };
 
-void ProxyServer::handleAdminPacket(Packet packet) {
+void ProxyServer::handleAgentPacket(Packet packet) {
     switch (packet.getType()) {
-        case CONNECT:
+        case MSG: {
+            MsgData msgData(packet.data, packet.getDataLength());
+            printf("MSG FROM AGENT: %s\n", msgData.msg);
             break;
-        case MSG:
-            break;
+        }
         case RSH:
             break;
-        case SHOW:
-            updateList();
-            break;
         case PING:
-            break;
-        case ADMINLOGIN:
             break;
         case SETCONFFILE:
             break;
@@ -127,102 +130,33 @@ void ProxyServer::handleAdminPacket(Packet packet) {
         case ERROR:
             exit(1);
     }
-
 }
+
+void ProxyServer::handleAdminPacket(Packet packet) {
+    switch (packet.getType()) {
+        case MSG:
+            break;
+        case RSH:
+            break;
+        case PING:
+            break;
+        case SETCONFFILE:
+            break;
+        case GETCONFFILE:
+            break;
+        case ERROR:
+            exit(1);
+    }
+}
+
 
 void ProxyServer::forward(Packet packet) {
     printf("forward method ");
-    if (memcmp(&adminConn.address.address, &packet.header.dst, sizeof(struct sockaddr_in)) == 0) {
-        sendPacket(adminConn.SockFD, packet);
-        printf("Admin at %s:%d", adminConn.address.connIP, adminConn.address.connPort);
-    }
-    for (int i = 0; i < connectedClients.size(); i++) {
-        if (memcmp(&connectedClients[i].address.address, &packet.header.dst, sizeof(struct sockaddr_in)) == 0) {
-            sendPacket(connectedClients[i].SockFD, packet);
-            printf("Client at %s:%d\n", connectedClients[i].address.connIP, connectedClients[i].address.connPort);
+    for (int i = 0; i < connections.size(); i++) {
+        if (memcmp(&connections[i].address.address, &packet.header.dst, sizeof(struct sockaddr_in)) == 0) {
+            sendPacket(connections[i].SockFD, packet);
+            printf("Forwarding to %s:%d\n", connections[i].address.connIP, connections[i].address.connPort);
         };
     }
-}
-
-void ProxyServer::updateList() {
-    char buffer[1024];
-    for (int i = 0; i < connectedClients.size(); i++) {
-        printf("%d -- ", i);
-        connectedClients[i].print();
-    }
-//    for (int i = 0; i < connectedClients.size(); i++) {
-//        if (isConnOpen(connectedClients[i])) {
-//            connectedClients.erase(connectedClients.begin() + i);
-//        }
-//    }
-
-}
-
-// ...
-
-void setSocketNonBlocking(int sockfd) {
-    int flags = fcntl(sockfd, F_GETFL, 0);
-    fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
-}
-
-// ...
-
-void ProxyServer::handleClients() {
-    printf("handling clients!!!!!!!!!!\n");
-    while (true) {
-        fd_set read_fds;
-        int max_fd = -1;
-
-        FD_ZERO(&read_fds);
-
-        for (const ConnData &client: connectedClients) {
-            if (client.SockFD != -1) {
-                FD_SET(client.SockFD, &read_fds);
-                if (client.SockFD > max_fd) {
-                    max_fd = client.SockFD;
-                }
-            }
-        }
-
-
-
-        if (!connectedClients.empty()) {
-            printf("got here\n");
-            if (select(max_fd + 1, &read_fds, NULL, NULL, NULL) == -1) {
-                perror("select");
-                exit(EXIT_FAILURE);
-            }
-
-            for (ConnData &client: connectedClients) {
-                if (client.SockFD != -1 && FD_ISSET(client.SockFD, &read_fds)) {
-                    Packet packet;
-                    int result = recvPacket(client.SockFD, &packet);
-
-                    if (result <= 0) {
-                        if (result == 0) {
-                            // Handle client disconnection logic if needed
-                            printf("Client disconnected on sockfd %d\n", client.SockFD);
-                            close(client.SockFD);
-                            client.SockFD = -1;
-                        } else {
-                            perror("recv");
-                            exit(EXIT_FAILURE);
-                        }
-                    } else {
-                        if (memcmp(&packet.header.dst, address, sizeof(struct sockaddr_in)) != 0) {
-                            forward(packet);
-                        } else {
-                            handleClientPacket(packet);
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-void ProxyServer::handleClientPacket(Packet packet) {
-    printf("got packet from client?");
 }
 

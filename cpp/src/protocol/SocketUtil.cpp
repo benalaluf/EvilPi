@@ -31,10 +31,9 @@ struct sockaddr_in* createIPv4Address(int sockFD) {
     struct sockaddr_in* addr = new struct sockaddr_in;
     socklen_t addrLen = sizeof(struct sockaddr_in);
 
-    if (getsockname(sockFD, reinterpret_cast<struct sockaddr*>(addr), &addrLen) == -1) {
+    if (getsockname(sockFD, (struct sockaddr*)(addr), &addrLen) == -1) {
         perror("getsockname");
         close(sockFD);
-        delete addr; // Free allocated memory before exiting
         exit(EXIT_FAILURE);
     }
     return addr;

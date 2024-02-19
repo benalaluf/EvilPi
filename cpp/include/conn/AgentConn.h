@@ -9,7 +9,7 @@ public:
     int main();
 
 private:
-    int clientSocketFD;
+    int agentSocketFD;
 
     struct sockaddr_in *localAddress;
 

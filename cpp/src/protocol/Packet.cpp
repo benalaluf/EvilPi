@@ -1,4 +1,5 @@
 #include "protocol/Packet.h"
+#include "protocol/ProtocolDebug.h"
 
 #include <iostream>
 
@@ -35,11 +36,11 @@ uint8_t *PacketHeader::serialized() {
     return bytes;
 }
 
-uint64_t PacketHeader::getDataLength() {
+uint64_t PacketHeader::getDataLength() const{
     return be64toh(dataLength);;
 }
 
-PacketType PacketHeader::getType() {
+PacketType PacketHeader::getType() const{
     return (PacketType) be16toh(type);
 }
 
@@ -142,7 +143,7 @@ int recvPacket(int sockFD, Packet *receivedPacket) {
         receivedPacket->data = nullptr;
     }
 
-    return 1;
+    return 0;
 }
 
 int recvall(int sockFD, void *buffer, uint64_t dataLength) {
