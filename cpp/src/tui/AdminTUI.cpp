@@ -2,12 +2,20 @@
 #include <iostream>
 
 
+using namespace std::placeholders;
 
+AdminTUI::AdminTUI(AdminConn *adminConn):adminConn(adminConn){
 
-AdminTUI::AdminTUI(AdminConn *adminConn){
+    commandProcessor.addCommand("test","for testing", std::bind(&AdminTUI::test, this, _1));
 
-    commandProcessor.addCommand("test","for testing", std::bind(&AdminConn::test, adminConn));
+}
 
+void AdminTUI::test(std::vector<std::string> args){
+    adminConn->test();
+
+    for (std::string str: args){
+        std::cout << str << '\n';
+    }
 }
 
 void AdminTUI::run() {

@@ -10,9 +10,10 @@ public:
 
 
     void run();
+    void test(std::vector<std::string> args);
 
 private:
-
+    AdminConn *adminConn;
     CommandProcessor commandProcessor;
 
 
