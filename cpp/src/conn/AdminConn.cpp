@@ -36,6 +36,3 @@ void AdminConn::send() {
 void AdminConn::handlePacket(Packet packet) {
 
 }
-void AdminConn::test() {
-    std::cout << "test\n";
-}

@@ -8,7 +8,6 @@ public:
 
     int main();
 
-
 private:
     int adminSocketFD;
 
@@ -27,7 +26,5 @@ private:
     void receive();
 
     void handlePacket(Packet packet);
-    void test();
 
-    friend class AdminTUI;
 };
