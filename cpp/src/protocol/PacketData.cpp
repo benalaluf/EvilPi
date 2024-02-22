@@ -3,21 +3,20 @@
 #include "protocol/Networking.h"
 
 
-MsgData::MsgData(char *msg) : msg(msg) {
-    dataLength = strlen(msg);
+MsgData::MsgData(std::string msg) : msg(msg) {
+    dataLength = msg.size();
 }
 
 MsgData::MsgData(uint8_t *bytes, uint64_t dataLength) {
-    msg = new char[dataLength];
-    memcpy(msg, bytes, dataLength);
+    msg = std::string(reinterpret_cast<const char *>(bytes));
+
 }
 
 uint8_t *MsgData::serialized() const {
     uint8_t *bytes = new uint8_t[dataLength];
-    memcpy(bytes, msg, dataLength);
+    memcpy(bytes, msg.c_str(), dataLength);
     return bytes;
 }
-
 
 CommandData::CommandData(std::string command) : command(command) {
     dataLength = command.size();

@@ -10,7 +10,7 @@ public:
 
 
     void run();
-    void test(std::vector<std::string> args);
+    void msgAgent(std::vector<std::string> args);
 
 private:
     AdminConn *adminConn;

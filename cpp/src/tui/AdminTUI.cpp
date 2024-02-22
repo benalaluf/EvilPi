@@ -8,17 +8,13 @@ using std::string;
 
 AdminTUI::AdminTUI(AdminConn *adminConn) : adminConn(adminConn) {
 
-    commandProcessor.addCommand("test", "for testing", std::bind(&AdminTUI::test, this, _1));
+    commandProcessor.addCommand("msg", "for testing", std::bind(&AdminTUI::msgAgent, this, _1));
     commandProcessor.addCommand("choose", "for choosin", std::bind(&AdminTUI::choose, this, _1));
 
 }
 
-void AdminTUI::test(std::vector<std::string> args) {
-    adminConn->test();
-
-    for (std::string str: args) {
-        std::cout << str << '\n';
-    }
+void AdminTUI::msgAgent(std::vector<std::string> args) {
+    adminConn->msgAgent(args.at(1));
 }
 
 void AdminTUI::choose(std::vector<std::string> args) {

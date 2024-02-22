@@ -16,11 +16,11 @@ public:
 
 class MsgData : public PacketData {
 public:
-    char *msg;
+    std::string msg;
 
     MsgData() {};
 
-    MsgData(char *msg);
+    MsgData(std::string msg);
 
     MsgData(uint8_t *bytes, uint64_t dataLength);
 

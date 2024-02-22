@@ -9,7 +9,6 @@
 AgentConn::AgentConn(const char *ip, int port) {
     agentSocketFD = createTCPIPv4Socket();
     serverAddress = createIPv4Address(ip, port);
-    localAddress = createIPv4Address(agentSocketFD);
 
 };
 
@@ -22,6 +21,7 @@ int AgentConn::main() {
 
 void AgentConn::connectToServer() {
     int result = connect(agentSocketFD, (sockaddr *) serverAddress, sizeof(struct sockaddr_in));
+    localAddress = createIPv4Address(agentSocketFD);
     if (result == 0) {
         Packet packet(AGENTCONNECT, localAddress, serverAddress);
         sendPacket(agentSocketFD, packet);
@@ -65,9 +65,8 @@ void AgentConn::handlePacket(Packet packet) {
 void AgentConn::handleMsg(Packet packet) {
     switchPacketSrcDst(packet);
     sendPacket(agentSocketFD, packet);
-    printf("sent to admin\n");
+    std::cout << "got msg: " << MsgData(packet.data, packet.getDataLength()).msg << '\n';
 }
-
 
 
 void AgentConn::send() {

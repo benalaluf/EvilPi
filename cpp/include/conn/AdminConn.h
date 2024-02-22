@@ -30,7 +30,7 @@ private:
 
     void handlePacket(Packet packet);
 
-    void test();
+    void msgAgent(std::string msg);
 
     void chooseAgent(std::string ip, int port);
 
