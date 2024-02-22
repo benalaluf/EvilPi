@@ -1,4 +1,5 @@
 #include "conn/AdminConn.h"
+#include "utils/CommandParser.h"
 #include "protocol/SocketUtil.h"
 #define ADMIN_INPUT_BUFFER 1024
 AdminConn::AdminConn(const char *ip, int port) {
@@ -22,16 +23,6 @@ void AdminConn::connectToServer() {
         printf("ERRRO WHILE TRYING TO CONNECT TO SEVER %d\n", result);
         exit(1);
     }
-}
-
-void AdminConn::adminInput() {
-    char buffer[ADMIN_INPUT_BUFFER];
-
-
-}
-
-void AdminConn::handleAdminInput(char *buffer) {
-
 }
 
 void AdminConn::receive() {

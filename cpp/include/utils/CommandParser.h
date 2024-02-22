@@ -1,8 +1,24 @@
-//
-// Created by ben on 2/21/24.
-//
+#pragma once
+#include <string>
+#include <functional>
+#include <map>
 
-#ifndef EVILPI_COMMANDPARSER_H
-#define EVILPI_COMMANDPARSER_H
 
-#endif //EVILPI_COMMANDPARSER_H
+struct Command {
+    std::string description;
+    std::function<void()> function;
+};
+
+class CommandProcessor {
+private:
+    std::map<std::string, Command> commands;
+
+public:
+    void addCommand(const std::string& name, const std::string& description, const std::function<void()>& function);
+
+    void processCommand(const std::string& command);
+
+    void displayCommands() const;
+
+};
+
