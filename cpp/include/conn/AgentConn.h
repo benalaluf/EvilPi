@@ -15,6 +15,9 @@ private:
 
     struct sockaddr_in *serverAddress;
 
+    int toShellPipe[2];
+    int fromShellPipe[2];
+
     void connectToServer();
 
     void send();

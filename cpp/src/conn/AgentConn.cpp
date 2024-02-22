@@ -49,9 +49,11 @@ void AgentConn::handlePacket(Packet packet) {
         case (MSG):
             handleMsg(packet);
             break;
-        case (RSH_COMMAND):
-//            startRSHSessionPipe(agentSocketFD);
+        case (RSH_COMMAND): {
+            int sd = startRSHSessionPipe(agentSocketFD, localAddress, &packet.header.dst, toShellPipe, fromShellPipe);
+            std::cout << sd;
             break;
+        }
         default:
             printf("got undefiend packet: %d", packet.getType());
             break;

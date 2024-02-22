@@ -20,13 +20,13 @@ int main() {
     char ip[1024];
     int port;
 
-    printf("enter ip and port: ");
-    scanf("%s %d", ip, &port);
-    printf("sending to %s:%d\n", ip, port);
-    char msg[]{"hello from admin :)"};
+//    printf("enter ip and port: ");
+//    scanf("%s %d", ip, &port);
+//    printf("sending to %s:%d\n", ip, port);
+    char msg[]{"ls"};
     MsgData msgData(msg);
 
-    Packet p1(MSG, localAddr, createIPv4Address(ip, port), msgData.serialized(), msgData.dataLength);
+    Packet p1(RSH_COMMAND, localAddr, createIPv4Address(ip, port), msgData.serialized(), msgData.dataLength);
 
     sendPacket(socketFD, p1);
     printSerializedPacketMemory(p1.seriallize());
