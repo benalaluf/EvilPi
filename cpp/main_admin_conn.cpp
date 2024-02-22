@@ -4,6 +4,7 @@
 #include "protocol/PacketData.h"
 #include "protocol/ProtocolDebug.h"
 #include "utils/CommandParser.h"
+#include "app/Admin.h"
 
 #include <iostream>
 
@@ -13,17 +14,10 @@
 
 
 int main() {
-    CommandProcessor processor;
-
-    // Adding a function using a lambda
-    processor.addCommand("printHello","sdf" ,[]() {
-        std::cout << "Hello, world!" << std::endl;
-    });
 
 
-
-    // Execute the stored functions
-    processor.processCommand("printHello");
+    Admin admin("0.0.0.0", 6969);
+    admin.main();
 
 
     return 0;
