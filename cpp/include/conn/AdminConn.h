@@ -16,6 +16,8 @@ private:
 
     struct sockaddr_in *serverAddress;
 
+    struct sockaddr_in *agentAddress;
+
     void connectToServer();
 
     void adminInput();
@@ -27,7 +29,10 @@ private:
     void receive();
 
     void handlePacket(Packet packet);
+
     void test();
+
+    void chooseAgent(std::string ip, int port);
 
     friend class AdminTUI;
 };

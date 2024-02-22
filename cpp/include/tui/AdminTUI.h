@@ -17,4 +17,5 @@ private:
     CommandProcessor commandProcessor;
 
 
+    void choose(std::vector<std::string> args);
 };

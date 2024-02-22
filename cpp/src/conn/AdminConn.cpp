@@ -39,3 +39,8 @@ void AdminConn::handlePacket(Packet packet) {
 void AdminConn::test() {
     std::cout << "test\n";
 }
+
+void AdminConn::chooseAgent(std::string ip, int port){
+
+    agentAddress = createIPv4Address(ip.c_str(), port);
+}

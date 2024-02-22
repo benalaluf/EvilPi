@@ -10,6 +10,7 @@ AgentConn::AgentConn(const char *ip, int port) {
     agentSocketFD = createTCPIPv4Socket();
     serverAddress = createIPv4Address(ip, port);
     localAddress = createIPv4Address(agentSocketFD);
+
 };
 
 int AgentConn::main() {
@@ -77,3 +78,6 @@ void AgentConn::send() {
     sendPacket(agentSocketFD, p1);
 
 };
+
+
+
