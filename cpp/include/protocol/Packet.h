@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <sys/socket.h>
 #include <cstdint>
 #include <cstddef>
@@ -9,15 +8,14 @@
 #include <memory>
 #include <cstring>
 #include "protocol/Networking.h"
-#include "protocol/Packet.h"
 #include "protocol/PacketData.h"
 
+#pragma pack(push, 1)
 
 #define HEADER_SIZE sizeof (struct PacketHeader)
 #define PACKET_HEADER_LENGTH_LENGTH sizeof uint64_t
 #define PACKET_HEADER_LENGTH_TYPE sizeof (uint16_t)
 #define PACKET_HEADER_LENGHT sizeof (struct PacketHeader)
-
 enum PacketType : uint16_t {
     AGENTCONNECT = 1,
     MSG = 2,
@@ -31,7 +29,6 @@ enum PacketType : uint16_t {
     ERROR = 0,
 
 };
-
 
 struct PacketHeader {
     uint16_t type;
@@ -49,7 +46,6 @@ struct PacketHeader {
 
     PacketType getType() const;
 };
-
 
 struct Packet {
     PacketHeader header;
@@ -91,4 +87,5 @@ int recvPacket(int sockFD, Packet *receivedPacket);
 
 int recvall(int sockFD, void *buffer, uint64_t dataLength);
 
-//#pragma pack(pop)
+
+#pragma pack(pop)

@@ -1,7 +1,7 @@
 #pragma once
+#include <map>
 #include <string>
 #include <functional>
-#include <map>
 
 
 struct Command {

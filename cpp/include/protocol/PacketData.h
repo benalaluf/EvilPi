@@ -4,7 +4,7 @@
 #include "protocol/Networking.h"
 #include "cstring"
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 
 class PacketData {
@@ -42,3 +42,4 @@ public:
     uint8_t *serialized() const override;
 
 };
+#pragma pack(pop)

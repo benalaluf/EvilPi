@@ -4,7 +4,8 @@
 #include <cstdint>
 #include <iostream>
 #include <iomanip>
-#include "Packet.h"
+#include "protocol/Packet.h"
+#include "protocol/PacketData.h"
 
 void printSerializedPacketMemory(uint8_t *data);
 
