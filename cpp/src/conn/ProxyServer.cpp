@@ -119,7 +119,7 @@ void ProxyServer::handleAgentPacket(Packet packet) {
             printf("MSG FROM AGENT: %s\n", msgData.msg);
             break;
         }
-        case RSH:
+        case RSH_COMMAND:
             break;
         case PING:
             break;
@@ -136,7 +136,7 @@ void ProxyServer::handleAdminPacket(Packet packet) {
     switch (packet.getType()) {
         case MSG:
             break;
-        case RSH:
+        case RSH_COMMAND:
             break;
         case PING:
             break;

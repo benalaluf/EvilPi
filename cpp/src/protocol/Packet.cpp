@@ -36,11 +36,11 @@ uint8_t *PacketHeader::serialized() {
     return bytes;
 }
 
-uint64_t PacketHeader::getDataLength() const{
+uint64_t PacketHeader::getDataLength() const {
     return be64toh(dataLength);;
 }
 
-PacketType PacketHeader::getType() const{
+PacketType PacketHeader::getType() const {
     return (PacketType) be16toh(type);
 }
 
@@ -56,12 +56,15 @@ Packet::Packet(PacketType type, struct sockaddr_in *src, struct sockaddr_in *dst
 }
 
 Packet::Packet(PacketType type, struct sockaddr_in *src, struct sockaddr_in *dst) :
-        Packet(type, src, dst, nullptr, 0){};
+        Packet(type, src, dst, nullptr, 0) {};
 
 Packet::Packet(PacketHeader header, uint8_t *bytes) {
     this->header = header;
     this->data = bytes;
 }
+
+Packet::Packet(PacketType type, struct sockaddr_in *src, struct sockaddr_in *dst, const PacketData &packetData) :
+        Packet(type, src, dst, packetData.serialized(), packetData.dataLength){};
 
 Packet::Packet(uint8_t *bytes) {
     memcpy(&this->header.type, bytes, sizeof(this->header.type));
@@ -91,10 +94,10 @@ uint64_t Packet::getDataLength() {
     return be64toh(header.dataLength);
 }
 
+
 const uint8_t *Packet::getData() {
     return data;
 }
-
 
 size_t Packet::getPacketLength() {
     return sizeof(struct PacketHeader) + this->getDataLength();
@@ -107,7 +110,7 @@ int sendPacket(int sockFD, Packet &&packet) {
     return result;
 };
 
-void switchPacketSrcDst(Packet &packet){
+void switchPacketSrcDst(Packet &packet) {
     struct sockaddr_in src = packet.header.src;
     packet.header.src = packet.header.dst;
     packet.header.dst = src;

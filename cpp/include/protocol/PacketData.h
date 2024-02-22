@@ -1,6 +1,6 @@
 #pragma once
 
-#include "protocol/Packet.h"
+#include <string>
 #include "protocol/Networking.h"
 #include "cstring"
 
@@ -11,7 +11,7 @@ class PacketData {
 public:
     uint64_t dataLength;
 
-    virtual uint8_t *serialized() = 0;
+    virtual uint8_t *serialized() const = 0;
 };
 
 class MsgData : public PacketData {
@@ -22,9 +22,23 @@ public:
 
     MsgData(char *msg);
 
-    MsgData(uint8_t *bytes, uint64_t dataLength);//todo: fix this: ugly
+    MsgData(uint8_t *bytes, uint64_t dataLength);
 
-    uint8_t *serialized() override;
+    uint8_t *serialized() const override;
 
 };
 
+
+class CommandData : public PacketData {
+public:
+    std::string command;
+
+    CommandData() {};
+
+    CommandData(std::string command);
+
+    CommandData(uint8_t *bytes, uint64_t dataLength);
+
+    uint8_t *serialized() const override;
+
+};

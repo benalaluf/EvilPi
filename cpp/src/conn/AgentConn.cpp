@@ -49,8 +49,8 @@ void AgentConn::handlePacket(Packet packet) {
         case (MSG):
             handleMsg(packet);
             break;
-        case (RSH):
-            startRSHSessionPipe(agentSocketFD);
+        case (RSH_COMMAND):
+//            startRSHSessionPipe(agentSocketFD);
             break;
         default:
             printf("got undefiend packet: %d", packet.getType());
