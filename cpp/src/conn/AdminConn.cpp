@@ -50,6 +50,11 @@ void AdminConn::handlePacket(Packet packet) {
         case (RSH_COMMAND): {
             break;
         }
+        case(SHOW):{
+            MsgData msgData(packet.data, packet.getDataLength());
+            std::cout << msgData.msg;
+            break;
+        }
         default:
             printf("got undefiend packet: %d", packet.getType());
             break;
@@ -67,3 +72,9 @@ void AdminConn::msgAgent(std::string msg) {
     Packet packet(MSG,localAddress,agentAddress,msgData);
     sendPacket(adminSocketFD, packet);
 }
+
+void AdminConn::showConnectedClients(){
+    Packet packet(SHOW,localAddress,serverAddress);
+    sendPacket(adminSocketFD, packet);
+}
+

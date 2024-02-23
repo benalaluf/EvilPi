@@ -33,9 +33,13 @@ private:
 
     void handleAgent(ConnData connData);
 
-    void handleAgentPacket(Packet packet);
+    void handleAgentPacket(ConnData connData, Packet packet);
 
-    void handleAdminPacket(Packet packet);
+    void handleAdminPacket(ConnData connData, Packet packet);
+
+    void handleConnectionClosed(ConnData connData);
+
+    void sendConnectionList(ConnData connData);
 
     void forward(Packet packet);
 };

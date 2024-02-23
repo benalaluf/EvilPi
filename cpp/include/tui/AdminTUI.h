@@ -18,4 +18,6 @@ private:
 
 
     void choose(std::vector<std::string> args);
+
+    void showConnections(std::vector<std::string> args);
 };

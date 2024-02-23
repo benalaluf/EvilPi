@@ -10,11 +10,16 @@ AdminTUI::AdminTUI(AdminConn *adminConn) : adminConn(adminConn) {
 
     commandProcessor.addCommand("msg", "for testing", std::bind(&AdminTUI::msgAgent, this, _1));
     commandProcessor.addCommand("choose", "for choosin", std::bind(&AdminTUI::choose, this, _1));
+    commandProcessor.addCommand("show", "for choosin", std::bind(&AdminTUI::showConnections, this, _1));
 
 }
 
 void AdminTUI::msgAgent(std::vector<std::string> args) {
     adminConn->msgAgent(args.at(1));
+}
+
+void AdminTUI::showConnections(std::vector<std::string> args) {
+    adminConn->showConnectedClients();
 }
 
 void AdminTUI::choose(std::vector<std::string> args) {

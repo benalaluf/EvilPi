@@ -35,4 +35,6 @@ private:
     void chooseAgent(std::string ip, int port);
 
     friend class AdminTUI;
+
+    void showConnectedClients();
 };

@@ -64,7 +64,7 @@ Packet::Packet(PacketHeader header, uint8_t *bytes) {
 }
 
 Packet::Packet(PacketType type, struct sockaddr_in *src, struct sockaddr_in *dst, const PacketData &packetData) :
-        Packet(type, src, dst, packetData.serialized(), packetData.dataLength){};
+        Packet(type, src, dst, packetData.serialized(), packetData.dataLength) {};
 
 Packet::Packet(uint8_t *bytes) {
     memcpy(&this->header.type, bytes, sizeof(this->header.type));
@@ -125,9 +125,10 @@ int sendPacket(int sockFD, Packet &packet) {
 
 int recvPacket(int sockFD, Packet *receivedPacket) {
     PacketHeader packetHeader;
-    if (recvall(sockFD, &packetHeader, PACKET_HEADER_LENGHT) != 0) {
-        return -3;
-    }
+    int status = recvall(sockFD, &packetHeader, PACKET_HEADER_LENGHT);
+    if (status != 0)
+        return status;
+
 
     receivedPacket->header = packetHeader;
 
@@ -136,9 +137,10 @@ int recvPacket(int sockFD, Packet *receivedPacket) {
     if (dataLength != 0) {
         uint8_t *databuffer = new uint8_t[dataLength];
 
-        if (recvall(sockFD, databuffer, dataLength) != 0) {
+        int status = recvall(sockFD, databuffer, dataLength);
+        if (status != 0) {
             delete[] databuffer;
-            return -4;
+            return status;
         }
 
         receivedPacket->data = databuffer;
@@ -157,7 +159,7 @@ int recvall(int sockFD, void *buffer, uint64_t dataLength) {
         dataRecved = recv(sockFD, (uint8_t *) buffer + total, dataLength - total, 0);
 
         if (dataRecved == 0) {
-            printf("Connection closed by peer\n");
+//            printf("Connection closed by peer\n");
             return -1;
         }
 
