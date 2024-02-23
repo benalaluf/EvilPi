@@ -8,12 +8,15 @@ public:
 
     int main();
 
+
 private:
     int adminSocketFD;
 
     struct sockaddr_in *localAddress;
 
     struct sockaddr_in *serverAddress;
+
+    struct sockaddr_in *agentAddress;
 
     void connectToServer();
 
@@ -27,4 +30,15 @@ private:
 
     void handlePacket(Packet packet);
 
+    void msgAgent(std::string msg);
+
+    void chooseAgent(std::string ip, int port);
+
+    friend class AdminTUI;
+
+    void showConnectedClients();
+
+    void sendCommand(std::string msg);
+
+    void openRSH();
 };

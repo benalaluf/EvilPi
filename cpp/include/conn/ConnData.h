@@ -35,8 +35,8 @@ struct ConnData {
     }
 
     char *getData() {
-        char *data = new char[25];
-        snprintf(data, 25, "Client fd: %d, addr: %s:%d\n", SockFD, address.connIP, address.connPort);
+        char *data = new char[100];
+        snprintf(data, 100, "Client fd: %d, addr: %s:%d\n", SockFD, address.connIP, address.connPort);
         return data;
     }
 

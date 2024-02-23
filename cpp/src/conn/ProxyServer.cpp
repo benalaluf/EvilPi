@@ -89,37 +89,40 @@ void ProxyServer::handleAgent(ConnData connData) {
     while (true) {
         Packet packet;
         int status = recvPacket(connData.SockFD, &packet);
-        if (status != 0) break;
+        if (status == -1) handleConnectionClosed(connData);
+        if (status!=0) break;
         if (memcmp(&packet.header.dst, address, sizeof(struct sockaddr_in)) != 0) {
             forward(packet);
         } else {
-            handleAgentPacket(packet);
+            handleAgentPacket(connData, packet);
         }
     }
 }
 
 void ProxyServer::handleAdmin(ConnData connData) {
-    printf("handling admin\n");
+    printf("handling adminssdf\n");
     while (true) {
         Packet packet;
         int status = recvPacket(connData.SockFD, &packet);
-        if (status != 0) break;
+        if (status == -1) handleConnectionClosed(connData);
+        if (status!=0) break;
         if (memcmp(&packet.header.dst, address, sizeof(struct sockaddr_in)) != 0) {
             forward(packet);
         } else {
-            handleAdminPacket(packet);
+            handleAdminPacket(connData, packet);
         }
     }
+
 };
 
-void ProxyServer::handleAgentPacket(Packet packet) {
+void ProxyServer::handleAgentPacket(ConnData connData ,Packet packet) {
     switch (packet.getType()) {
         case MSG: {
             MsgData msgData(packet.data, packet.getDataLength());
-            printf("MSG FROM AGENT: %s\n", msgData.msg);
+            printf("MSG FROM AGENT: %s\n", msgData.msg.c_str());
             break;
         }
-        case RSH:
+        case RSH_COMMAND:
             break;
         case PING:
             break;
@@ -132,14 +135,14 @@ void ProxyServer::handleAgentPacket(Packet packet) {
     }
 }
 
-void ProxyServer::handleAdminPacket(Packet packet) {
+void ProxyServer::handleAdminPacket(ConnData connData, Packet packet) {
     switch (packet.getType()) {
         case MSG:
             break;
-        case RSH:
+        case RSH_COMMAND:
             break;
-        case PING:
-            break;
+        case SHOW:
+            sendConnectionList(connData);
         case SETCONFFILE:
             break;
         case GETCONFFILE:
@@ -158,5 +161,32 @@ void ProxyServer::forward(Packet packet) {
             printf("Forwarding to %s:%d\n", connections[i].address.connIP, connections[i].address.connPort);
         };
     }
+}
+
+void ProxyServer::handleConnectionClosed(ConnData connData) {
+    std::cout << "dissconnected: " << connData.getData() << "\n";
+    for (auto it = connections.begin(); it != connections.end(); ++it) {
+        if (it->SockFD == connData.SockFD) {
+            connections.erase(it);
+            break;
+        }
+    }
+}
+
+void ProxyServer::sendConnectionList(ConnData connData) {
+    std::string list;
+    for (auto conn: connections) {
+        list += conn.getData();
+        list += "\n";
+    }
+
+
+    if (!list.empty()) {
+        list.pop_back();
+    }
+
+    MsgData data(list);
+    Packet p(SHOW, address, &connData.address.address, data);
+    sendPacket(connData.SockFD, p);
 }
 

