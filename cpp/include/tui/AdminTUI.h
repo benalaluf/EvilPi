@@ -20,4 +20,8 @@ private:
     void choose(std::vector<std::string> args);
 
     void showConnections(std::vector<std::string> args);
+
+    void openRSH(std::vector<std::string> args);
+
+    void sendCommand(std::vector<std::string> args);
 };

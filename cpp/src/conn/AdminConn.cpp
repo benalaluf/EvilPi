@@ -10,10 +10,6 @@ AdminConn::AdminConn(const char *ip, int port) {
 
 int AdminConn::main() {
     connectToServer();
-
-    std::thread thread(std::bind(&AdminConn::receive, this));
-    thread.detach();
-
     return 0;
 }
 
@@ -31,15 +27,13 @@ void AdminConn::connectToServer() {
 }
 
 void AdminConn::receive() {
-    while (true) {
         Packet packet;
         int status = recvPacket(adminSocketFD, &packet);;
         if (status != 0) {
             printf("error while recvPacket %d", status);
-            break;
+            return;
         }
         handlePacket(packet);
-    }
 }
 
 void AdminConn::handlePacket(Packet packet) {
@@ -48,7 +42,8 @@ void AdminConn::handlePacket(Packet packet) {
             std::cout << "got packet: " << MsgData(packet.data, packet.getDataLength()).msg << '\n';
             break;
         case (RSH_COMMAND): {
-            break;
+            MsgData msgData(packet.data, packet.getDataLength());
+            std::cout << msgData.msg;
         }
         case(SHOW):{
             MsgData msgData(packet.data, packet.getDataLength());
@@ -71,10 +66,24 @@ void AdminConn::msgAgent(std::string msg) {
     MsgData msgData(msg);
     Packet packet(MSG,localAddress,agentAddress,msgData);
     sendPacket(adminSocketFD, packet);
+    receive();
+}
+
+void AdminConn::sendCommand(std::string msg) {
+    MsgData msgData(msg);
+    Packet packet(RSH_COMMAND,localAddress,agentAddress,msgData);
+    sendPacket(adminSocketFD, packet);
+    receive();
+}
+
+void AdminConn::openRSH() {
+    Packet packet(RSH_REQ,localAddress,agentAddress);
+    sendPacket(adminSocketFD, packet);
 }
 
 void AdminConn::showConnectedClients(){
     Packet packet(SHOW,localAddress,serverAddress);
     sendPacket(adminSocketFD, packet);
+    receive();
 }
 

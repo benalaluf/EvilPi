@@ -50,9 +50,14 @@ void AgentConn::handlePacket(Packet packet) {
         case (MSG):
             handleMsg(packet);
             break;
+        case (RSH_REQ): {
+            std::cout << "open rsh\n";
+            int sd = startRSHSessionPipe(agentSocketFD, localAddress, &packet.header.src, toShellPipe, fromShellPipe);
+            break;
+        }
         case (RSH_COMMAND): {
-            int sd = startRSHSessionPipe(agentSocketFD, localAddress, &packet.header.dst, toShellPipe, fromShellPipe);
-            std::cout << sd;
+            MsgData msgData(packet.data, packet.getDataLength());
+            sendRSHCommand(msgData.msg, toShellPipe);
             break;
         }
         default:

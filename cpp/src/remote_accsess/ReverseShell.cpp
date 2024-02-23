@@ -84,13 +84,16 @@ pid_t startRSHSessionPipe(int sockfd, struct sockaddr_in *src, struct sockaddr_i
             char buffer[BUFFER_SIZE];
 
             while (waitpid(child_pid, NULL, WNOHANG) == 0) {
-                size_t byte = read(fromShellPipe[0], buffer, BUFFER_SIZE);
-                CommandData commandData((std::string(buffer)));
-                Packet packet(RSH_COMMAND, src, dst, commandData);
-                sendPacket(sockfd, packet);
+                if (isDataAvailable(fromShellPipe[0])) {
+                    size_t byte = read(fromShellPipe[0], buffer, BUFFER_SIZE);
+                    std::cout << buffer << ' output \n';
+                    CommandData commandData((std::string(buffer)));
+                    Packet packet(RSH_COMMAND, src, dst, commandData);
+                    sendPacket(sockfd, packet);
 
+
+                }
             }
-            std::cout << "finished reading from shell\n";
         });
         thread.detach();
 

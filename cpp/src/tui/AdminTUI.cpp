@@ -11,6 +11,8 @@ AdminTUI::AdminTUI(AdminConn *adminConn) : adminConn(adminConn) {
     commandProcessor.addCommand("msg", "for testing", std::bind(&AdminTUI::msgAgent, this, _1));
     commandProcessor.addCommand("choose", "for choosin", std::bind(&AdminTUI::choose, this, _1));
     commandProcessor.addCommand("show", "for choosin", std::bind(&AdminTUI::showConnections, this, _1));
+    commandProcessor.addCommand("rsh", "for choosin", std::bind(&AdminTUI::openRSH, this, _1));
+    commandProcessor.addCommand("sh", "for choosin", std::bind(&AdminTUI::sendCommand, this, _1));
 
 }
 
@@ -21,6 +23,12 @@ void AdminTUI::msgAgent(std::vector<std::string> args) {
 void AdminTUI::showConnections(std::vector<std::string> args) {
     adminConn->showConnectedClients();
 }
+void AdminTUI::openRSH(std::vector<std::string> args) {
+    adminConn->openRSH();
+}void AdminTUI::sendCommand(std::vector<std::string> args) {
+    adminConn->sendCommand(args[1]);
+}
+
 
 void AdminTUI::choose(std::vector<std::string> args) {
 
@@ -42,7 +50,11 @@ void AdminTUI::run() {
     std::string input;
     while (true) {
         std::cout << "> ";
-        std::getline(std::cin, input);
+        if (!std::getline(std::cin, input)) {
+            // EOF encountered (Ctrl+D)
+            std::cout << "\nExiting...\n";
+            break;
+        }
 
         if (input == "help") {
             commandProcessor.displayCommands();

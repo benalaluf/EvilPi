@@ -37,4 +37,8 @@ private:
     friend class AdminTUI;
 
     void showConnectedClients();
+
+    void sendCommand(std::string msg);
+
+    void openRSH();
 };
